@@ -1,0 +1,13 @@
+[Unit]
+Description=Bezkoder backend service
+After=syslog.target google-startup-scripts.service
+
+[Service]
+User=backend
+WorkingDirectory=/opt/bezkoder-backend
+EnvironmentFile=/opt/bezkoder-backend/.env
+ExecStartPre=/bin/sleep 10
+ExecStart=java -jar spring-boot-data-jpa-0.0.1-SNAPSHOT.jar
+
+[Install]
+WantedBy=multi-user.target
