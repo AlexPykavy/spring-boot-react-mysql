@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - cloud-vms
+    paths:
+      - 'packer/backend/**'
+      - 'spring-boot-server/**'
   pull_request:
     branches:
       - cloud-vms

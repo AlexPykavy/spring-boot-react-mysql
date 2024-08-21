@@ -1,0 +1,50 @@
+name: Provision infra
+
+on:
+  # https://stackoverflow.com/questions/63362126/github-actions-how-to-run-a-workflow-created-on-a-non-master-branch-from-the-wo
+  push:
+    branches:
+      - cloud-vms
+    paths:
+      - 'terraform/**'
+  workflow_dispatch:
+
+
+jobs:
+  Provision-Infra:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./terraform
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Retrieve the GCP service account secret and save it to a file
+        env:
+          GCP_CREDENTIALS_JSON: ${{ secrets.GCP_CREDENTIALS_JSON }}
+        run: |
+          echo "$GCP_CREDENTIALS_JSON" > service-account.json
+
+      - name: Terraform init
+        run: |
+          terraform init
+
+      - name: Terraform plan
+        env:
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_PROJECT_ZONE: ${{ secrets.GCP_PROJECT_ZONE }}
+        run: |
+          terraform plan \
+            -var "project=$GCP_PROJECT_ID" \
+            -var "region=$GCP_PROJECT_ZONE"
+
+      - name: Terraform apply
+        env:
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_PROJECT_ZONE: ${{ secrets.GCP_PROJECT_ZONE }}
+        run: |
+          terraform apply \
+            -var "project=$GCP_PROJECT_ID" \
+            -var "region=$GCP_PROJECT_ZONE" \
+            -auto-approve
